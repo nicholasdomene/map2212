@@ -13,21 +13,15 @@ import ghalton
 random_seed = 42
 sequencer = ghalton.GeneralizedHalton(1, random_seed)
 '''
-- Find out how to use, in your computational environment, 
-library functions to generate random variables with Uniform, 
-Beta, Gamma and Weibull distributions.
+- As an Improvement on your 2nd Programming Exercise,
+consider replacing the Pseudo Random Number Generator
+by a Quasi Random Number Generator.
 
-- Implement the four variants of Monte Carlo integration 
-we studied to integrate the function 
-$f(x) = e^{-ax}cos(bx)$ in $[0, 1]$, where $a = 0.RG$, $b = 0.CPF$, 
-and RG and CPF stand for digits of your official IDs.
+- Do your Monte Carlo integration routines work better?
+Empirically, how faster are now your integration routines?
 
-- Choose parameters for each sampling distribution by visual 
-inspection or any other method you like (adapt domain?). 
-Choose a polynomial function for control variate. 
-Choose $n$ to get a relative error 
-$\frac{|\hat\gamma - \gamma |}{\gamma} < 0.0005$ 
-(without knowing $\gamma$!)
+- You should carefully explain how and why you did
+your empirical analysis and reached your conclusions.
 '''
 
 def f(x):
