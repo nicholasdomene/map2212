@@ -77,14 +77,15 @@ def hit_or_miss(n, generator_method="pseudo"):
 	of f(x) in the interval [0, 1], and its variance
 	'''
 	gamma_hat = 0
+	hit_or_miss_sequencer = ghalton.GeneralizedHalton(2)
 	for i in range(n):
 		if generator_method=="pseudo":
 			x = np.random.uniform(low=0, high=1)
 			y = np.random.uniform(low=0, high=1)
 		else:
-			two_numbers = sequencer.get(2)
-			x = two_numbers[0][0]
-			y = two_numbers[1][0]
+			two_numbers = hit_or_miss_sequencer.get(1)[0]
+			x = two_numbers[0]
+			y = two_numbers[1]
 		f_x = f(x)
 		if y <= f_x:
 			gamma_hat += 1
