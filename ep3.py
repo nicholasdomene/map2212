@@ -1,6 +1,8 @@
 # Exercício Programa 3 - MAP2212
 # Nicholas Gialluca Domene
 # Número USP 8543417
+# Felipe de Moura Ferreira
+# Número USP 9864702
 # 23 de maio de 2021
 
 import math
