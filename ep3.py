@@ -10,7 +10,8 @@ from scipy.stats.stats import pearsonr
 import random
 import datetime
 import ghalton
-random_seed = 42
+random_seed = 1
+np.random.seed(random_seed)
 sequencer = ghalton.GeneralizedHalton(1, random_seed)
 '''
 - As an Improvement on your 2nd Programming Exercise,
@@ -30,14 +31,19 @@ def f(x):
 	return math.exp(-rg*x)*math.cos(cpf*x)
 
 def beta_density(x, alpha, beta):
-	beta_hat = math.gamma(alpha)*math.gamma(beta)/math.gamma(alpha+beta)
-	return (x**(alpha - 1)*(1 - x)**(beta-1))/beta_hat
+	if alpha == beta:
+		gamma_alpha = math.gamma(alpha)
+		gamma_alpha_beta = math.gamma(alpha+beta)
+		beta_hat = gamma_alpha**2/gamma_alpha_beta
+	else:
+		beta_hat = math.gamma(alpha)*math.gamma(beta)/math.gamma(alpha+beta)
+	return ((x**(alpha - 1))*((1 - x)**(beta-1)))/beta_hat
 
 def crude(n, generator_method="pseudo"):
 	#int, str -> float (gamma hat), boolean (is relative error below 0.0005)
 	'''
 	Receives an integer n that will be used to generate n points
-	and a random generating method ('pseudo' or 'quadi') and 
+	and a random generating method ('pseudo' or 'quasi') and 
 	generate the value of gamma hat, estimation for the integral
 	of f(x) in the interval [0, 1], and its variance
 	'''
@@ -64,7 +70,7 @@ def hit_or_miss(n, generator_method="pseudo"):
 	#int -> float (gamma hat), boolean (is relative error below 0.0005)
 	'''
 	Receives an integer n that will be used to generate n points
-	and a random generating method ('pseudo' or 'quadi') and 
+	and a random generating method ('pseudo' or 'quasi') and 
 	generate the value of gamma hat, estimation for the integral
 	of f(x) in the interval [0, 1], and its variance
 	'''
@@ -74,8 +80,8 @@ def hit_or_miss(n, generator_method="pseudo"):
 			x = np.random.uniform(low=0, high=1)
 			y = np.random.uniform(low=0, high=1)
 		else:
-			y = sequencer.get(1)[0][0]
 			x = sequencer.get(1)[0][0]
+			y = sequencer.get(1)[0][0]
 		f_x = f(x)
 		if y <= f_x:
 			gamma_hat += 1
@@ -93,7 +99,7 @@ def importance_sampling(n, generator_method="pseudo"):
 	#int -> float (gamma hat), boolean (is relative error below 0.0005)
 	'''
 	Receives an integer n that will be used to generate n points
-	and a random generating method ('pseudo' or 'quadi') and 
+	and a random generating method ('pseudo' or 'quasi') and 
 	generate the value of gamma hat, estimation for the integral
 	of f(x) in the interval [0, 1], and its variance
 	'''
@@ -124,7 +130,7 @@ def control_variate(n, generator_method="pseudo"):
 	#int -> float (gamma hat), boolean (is relative error below 0.0005)
 	'''
 	Receives an integer n that will be used to generate n points
-	and a random generating method ('pseudo' or 'quadi') and
+	and a random generating method ('pseudo' or 'quasi') and
 	generate the value of gamma hat, estimation for the integral
 	of f(x) in the interval [0, 1], and its variance
 	'''
@@ -180,11 +186,6 @@ def run_experiment_increasing_n(variant_implementation_function, generator_metho
 
 
 def __main__():
-	random_seed = 1
-	np.random.seed(random_seed)
-	random_seed = 42
-	sequencer = ghalton.GeneralizedHalton(1, random_seed)
-
 	print("MAP2212")
 	print("Nicholas Gialluca Domene")
 	print("N USP 8543417")
@@ -192,7 +193,7 @@ def __main__():
 	print("Executing solution for Programming Exercise 3")
 	print("Random seed: ", random_seed)
 	print("According to WolframAlpha")
-	print("- Integral of f(x) between 0 and 1: 0.80452")
+	print("- Integral of f(x) between 0 and 1: 0.804542")
 	print()
 	print()
 
@@ -228,7 +229,7 @@ def __main__():
 	print("  Is error below threshold: ", is_error_below_threshold)
 	print("  Time taken: ", t1-t0)
 	print()
-	print("- Quaise-random")
+	print("- Quasi-random")
 	t0 = datetime.datetime.now()
 	gamma_hat, error, is_error_below_threshold = hit_or_miss(2722500, generator_method="quasi")
 	t1 = datetime.datetime.now()
