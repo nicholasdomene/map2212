@@ -80,8 +80,9 @@ def hit_or_miss(n, generator_method="pseudo"):
 			x = np.random.uniform(low=0, high=1)
 			y = np.random.uniform(low=0, high=1)
 		else:
-			x = sequencer.get(1)[0][0]
-			y = sequencer.get(1)[0][0]
+			two_numbers = sequencer.get(2)
+			x = two_numbers[0][0]
+			y = two_numbers[1][0]
 		f_x = f(x)
 		if y <= f_x:
 			gamma_hat += 1
@@ -224,19 +225,19 @@ def __main__():
 	t0 = datetime.datetime.now()
 	gamma_hat, error, is_error_below_threshold = hit_or_miss(2722500, generator_method="pseudo")
 	t1 = datetime.datetime.now()
-	print("  Gamma hat: ", gamma_hat)
-	print("  Relative error: ", error)
+	print("  Gamma hat:                ", gamma_hat)
+	print("  Relative error:           ", error)
 	print("  Is error below threshold: ", is_error_below_threshold)
-	print("  Time taken: ", t1-t0)
+	print("  Time taken:               ", t1-t0)
 	print()
 	print("- Quasi-random")
 	t0 = datetime.datetime.now()
 	gamma_hat, error, is_error_below_threshold = hit_or_miss(2722500, generator_method="quasi")
 	t1 = datetime.datetime.now()
-	print("  Gamma hat: ", gamma_hat)
-	print("  Relative error: ", error)
+	print("  Gamma hat:                ", gamma_hat)
+	print("  Relative error:           ", error)
 	print("  Is error below threshold: ", is_error_below_threshold)
-	print("  Time taken: ", t1-t0)
+	print("  Time taken:               ", t1-t0)
 	print()
 	print()
 	sequencer.reset()
