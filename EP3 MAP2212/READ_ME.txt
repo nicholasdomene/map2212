@@ -1,0 +1,1 @@
+Para compilar esses arquivos no TexMaker você precisa compilar primeiro os gráficos (quasi_plot.tex, uniform_plot.tex) para só então, compilar o relatório.tex. Há uma forma melhora isso, porém eu não tive tempo de testar.

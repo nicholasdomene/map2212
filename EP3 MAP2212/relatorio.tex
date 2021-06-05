@@ -1,0 +1,313 @@
+\documentclass[twocolumn,amsmath,amssymb,floatfix]{revtex4}
+\usepackage[export]{adjustbox}
+\usepackage{standalone}
+\usepackage{graphicx}% Include figure files
+\usepackage{dcolumn}% Align table columns on decimal point
+\usepackage{bm}% bold math
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{epsf}
+\usepackage{color} % allows color in fonts
+\usepackage{verbatim}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage{float}
+\usepackage{tikz}
+\usepackage{pgfplots}
+\usepackage{bbold}
+\usepackage[brazilian]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+
+\setlength{\tabcolsep}{0.7\tabcolsep}
+\definecolor{mygreen}{RGB}{144,238,144}
+\newcommand{\PAR}[1]{\left({[#1]}\right)}
+\newcommand{\highlight}[1]{\colorbox{mygreen}{$\displaystyle #1$}}
+
+\lstdefinestyle{customc}{
+  belowcaptionskip=1\baselineskip,
+  breaklines=true,
+  frame=none,
+  xleftmargin=\parindent,
+  language=C,
+  showstringspaces=false,
+  basicstyle=\footnotesize\ttfamily,
+  keywordstyle=\bfseries\color{green!40!black},
+  commentstyle=\itshape\color{purple!40!black},
+  identifierstyle=\color{blue},
+  stringstyle=\color{orange},
+}
+
+\lstdefinestyle{customasm}{
+  belowcaptionskip=1\baselineskip,
+  frame=trBL,
+  xleftmargin=\parindent,
+  language=[x86masm]Assembler,
+  basicstyle=\footnotesize\ttfamily,
+  commentstyle=\itshape\color{purple!40!black},
+}
+
+\lstset{escapechar=@,style=customc}
+
+\titlespacing\section{0pt}{12pt plus 4pt minus 2pt}{8pt plus 2pt minus 2pt}
+\titlespacing\subsection{0pt}{12pt plus 4pt minus 2pt}{8pt plus 2pt minus 2pt}
+\titlespacing\subsubsection{0pt}{12pt plus 4pt minus 2pt}{0pt plus 2pt minus 2pt}
+
+\begin{document}
+
+%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%
+% T I T U L O
+%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%
+
+\title{Métodos de Monte Carlo - EP 3}
+
+\author{Felipe de Moura Ferreira, 9864702 \\ Nicholas Gialluca Domene, 8543417} 
+\affiliation{
+Instituto de Matemática e Estatística - Universidade de São Paulo\\
+}
+
+\begin{abstract}
+\baselineskip 11pt
+Analisaremos o efeito do uso de sequências quasi-aleatórias em quatro variantes do Método de Monte Carlo.
+\end{abstract}
+
+\maketitle
+
+%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%
+\section{Introdução}
+%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%
+
+Utilizaremos um gerador de números quasi-aleatórios e quatro variantes do Método de Monte Carlo: ``\textbf{\textit{Crude}}'', ``\textbf{\textit{Hit-or-Miss}}'', ``\textbf{\textit{Importance Sampling}}'' e ``\textbf{\textit{Control Variate}}'', para calcular a integral
+
+\begin{eqnarray}
+\gamma = \int_{0}^{1} f(x)dx
+\end{eqnarray} 
+ 
+da seguinte função em $[0, 1]$:
+
+\begin{eqnarray}
+f(x) = e^{-\mathbf{\color{red}a}x} \cdot cos{(\mathbf{\color{blue}b}x)}
+\end{eqnarray}
+
+onde $\mathbf{\color{red}a} = 0.\mathtt{RG}$ e $\mathbf{\color{blue}b} = 0.\mathtt{CPF}$. A fim de obter um erro relativo menor que $5\%$:
+
+\begin{eqnarray}
+\frac{| \hat{\gamma} - \gamma |}{\gamma} < 0.0005 = \epsilon
+\end{eqnarray}
+
+Onde $\hat{\gamma}$ é a estimativa de $f$ pelo método de Monte Carlo e $\gamma$ que desconhecemos.
+
+
+%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%
+\section{Implementação e Estratégia}
+%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%
+
+Os algoritmos foram implementados na linguagem \textit{Python}, organizado em um único arquivo: \textit{ep3.py}.
+
+A estratégia geral será tratar cada implementação como um projeto de experimento que usando as etapas definidas e também o n proposto, o resultado do experimento obtido dará uma estimativa para o valor verdadeiro da integral, $\gamma$, a um intervalo de confiança inferior a 0,0005\% e o valor estimado com 95\% de confiança.\\
+
+Para os métodos \textbf{Crude}, \textbf{Importance Sampling} e \textbf{Control Variates}, como não há um meio de determinar $n$ sem executar experimentos e verificar a variância obtidade, definimos a função \verb|run_experiment_increasing_n| que executa cada implementação com um $n$ crescente dado até que $n$ atinja uma estimação de forma que o erro relativo seja menor do que o limiar $0.0005$. A cada tentativa, $n$ irá dobrar o seu valor, isto é, $n$ será $2^i$ na $i$-ésima tentativa.\\
+
+
+%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Crude}
+%%%%%%%%%%%%%%%%%%%%%%
+
+No método \textit{Crude} consideramos as seguintes definições:
+\begin{eqnarray}
+x_{i} \sim U_{[a,b]},\quad \hat{\gamma}_{c} = \frac{1}{n}\sum_{i=1}^{n}f(x_{i})
+\end{eqnarray}
+\begin{eqnarray}
+E(\hat{\gamma}_{c}) = \gamma,\quad \sigma_{c}^{2} = \frac{1}{n}\int_{a}^{b}[f(x) - \gamma]^{2}dx
+\end{eqnarray}
+Na sua implementação, a função tem como parâmetro o número de pontos a ser gerado para estimar o valor desejado (integral de $f(x)$ em $[a,b])$ e retorna o $\hat{\gamma}$ que o valor estimado e uma variável booleana \verb|is_error_below_threshold| que assume o valor \verb|True| caso o erro relativo obtido é menor que o limiar e, \verb|False|, caso contrário. O erro relativo com um intervalo de 95\% de confiança é definido como:
+
+\begin{eqnarray}
+\epsilon = \frac{1.65\cdot\sqrt{\frac{Var(\hat{\gamma})}{n}}}{\hat{\gamma}}
+\end{eqnarray}
+
+
+%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Hit or Miss}
+%%%%%%%%%%%%%%%%%%%%%%
+
+No método \textit{Hit or Miss} consideramos as seguintes definições:
+\begin{eqnarray}
+h(x,y)=\mathbb{1}(y \leq f(x)),\quad \gamma = \int_{0}^{1}\int_{0}^{1}h(x,y)dxdy
+\end{eqnarray}
+\begin{eqnarray}
+\hat{\gamma}_{h} = \frac{1}{n}\sum_{i=1}^{n}h(x_{i},y_{i}),\quad \sigma_{h}^{2}=\frac{\gamma(1-\gamma)}{n}
+\end{eqnarray}
+\begin{eqnarray}
+\sigma_{h}^{2} - \sigma_{c}^{2} = \frac{1}{n}\cdot f(x)\cdot(1-f(x))dx > 0
+\end{eqnarray}
+
+Como $f(x) \in [0, 1] \forall x \in [0,1]$, $\int_{0}^{1} f(x)$ pode ser interpretado como a probabilidade de qualquer ponto $(x_{i}, y_{i}) \in \mathbb{R}^{2}$ dado tal que $x_{i}, y_{i} \in [0, 1]$ caia sobre a curva $f(x)$. Portanto, isso pode ser interpretado como uma estimativa de probabilidade de um evento $p$ acontecer e a distribuição Binomial é a que melhor se adequa ao contexto.
+
+Basta algumas manipulações algébricas na aproximação Normal da distribuição Binomial, podemos encontrar o $n$:
+\begin{align}
+Z_{score} & = \frac{mdd}{\sqrt{\frac{\sigma^{2}}{n}}}\nonumber\\
+Z_{score}\cdot\frac{\sqrt{\sigma^{2}}}{\sqrt{n}} & = mdd\nonumber\\
+\frac{Z_{score}\cdot\sqrt{\sigma^{2}}}{mdd} & = \sqrt{n}\nonumber\\
+n &= \frac{Z_{score}^{2}\cdot\sigma^{2}}{mdd^{2}}
+\end{align}
+
+onde $mdd$ é a ``\textit{Minimal Detectable Difference}'' que neste caso é $0.0005\%$, significa que o pior caso possível será $0.0005$ (se $\int_{0}^{1}f(x)dx=1$). Considerando o cenário de pior caso, temos:
+
+\begin{eqnarray}
+mmd = 0.0005,\quad Z_{score} = 1.65,\quad \sigma^{2} = 0.25
+\end{eqnarray}
+
+\begin{eqnarray}
+n = \frac{1.65^{2} \cdot 0.25}{0.0005^{2}} = 2722500
+\end{eqnarray}
+
+Na sua implementação, a função tem como parâmetro o número de pontos a ser gerado para estimar o valor desejado (integral de $f(x)$ em $[a,b])$ e retorna o $\hat{\gamma}$ que o valor estimado e uma variável booleana \verb|is_error_below_threshold| que assume o valor \verb|True| caso o erro relativo obtido é menor que o limiar e, \verb|False|, caso contrário.
+
+%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Importance Sampling}
+%%%%%%%%%%%%%%%%%%%%%%
+
+No método \textit{Importance Sampling} consideramos as seguintes definições:
+\begin{eqnarray}
+\gamma = \int_{a}^{b}f(x)dx = \int \frac{f(x)}{g(x)}dx,\quad x_{i} \sim g(x)
+\end{eqnarray}
+\begin{eqnarray}
+\hat{\gamma}_{s} = \frac{1}{n}\sum_{i=1}^{n}\frac{f(x_{i}}{g(x_{i})}, \sigma_{s}^{2} = \frac{1}{n}\int\left(\frac{f(x)}{g(x)}-\gamma\right)^{2}g(x)dx
+\end{eqnarray}
+\begin{eqnarray}
+\sigma^{2}(x) = E(x^{2})-E^{2}(x)
+\end{eqnarray}
+
+Na sua implementação, a função tem como parâmetro o número de pontos a ser gerado para estimar o valor desejado (integral de $f(x)$ em $[a,b])$ e retorna o $\hat{\gamma}$ que o valor estimado e uma variável booleana \verb|is_error_below_threshold| que assume o valor \verb|True| caso o erro relativo obtido é menor que o limiar e, \verb|False|, caso contrário. O erro relativo com um intervalo de 95\% de confiança é definido como:
+
+\begin{eqnarray}
+\epsilon = \frac{1.65\cdot\sqrt{\frac{Var(\hat{\gamma})}{n}}}{\hat{\gamma}}
+\end{eqnarray}
+
+Por inspenção de tentativa-erro, escolhemos a função de aproximação Beta com os parâmetros $\alpha = 1$ e $\beta = 1$, dessa forma, cada ponto aleatório retornado irá seguir $X_{i}\sim\beta(1,1)$.
+
+
+%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Control Variates}
+%%%%%%%%%%%%%%%%%%%%%%
+
+No método \textit{Control Variates} escolhemos a função polinomial $\phi(x) = g(x) = 1 - \frac{2}{5}x$ pela sua facilidade de integração e porque aproxima $f(x)$ razoavelmente bem.
+
+\begin{eqnarray}
+\int_{0}^{1}g(x)dx = \int_{0}^{1}1-\frac{2}{5}xdx = \left[ x-\frac{2x^{2}}{10} \right]_{0}^{1} = \frac{4}{5}
+\end{eqnarray}
+
+Tomando as seguintes definições para a estimativa $\hat{\gamma}$:
+Seja $\varphi(x)$ ser uma variável de controle
+\begin{eqnarray}
+\gamma = \int\left[ f(x) - \varphi(x) \right]dx,\quad \gamma' = \int\varphi(x)dx
+\end{eqnarray}
+\begin{eqnarray}
+\hat{\gamma} = \frac{1}{n}\sum_{i=1}^{n}\left[f(x_{i}-\varphi(x_{i}) + \gamma' \right]
+\end{eqnarray}
+
+\begin{align}
+Var(\hat{\gamma}) & = \frac{1}{n}[\sigma^{2}(f(x))+\sigma^{2}(\varphi(x))-2\rho(f(x),\varphi(x))\nonumber \\
+&  \quad \cdot \sigma(f(x))\cdot\sigma(\varphi(x))]
+\end{align}
+
+Onde $\rho$ é a correlação de Pearson entre as variáveis, $\sigma$ é o desvio padrão de cada variával e $\sigma^{2}$ é a variância de cada variável.
+Nós utilizamos $\varphi(x)=g(x)=1-\frac{2}{5}x$, então $\gamma' = \int g(x)dx = \frac{4}{5}$, portando
+
+\begin{eqnarray}
+\hat{\gamma} = \frac{1}{n}\sum_{i=1}^{n}\left[ f(x_{i}) - \varphi(x_{i}) \right]
+\end{eqnarray}
+
+Na sua implementação, a função tem como parâmetro o número de pontos a ser gerado para estimar o valor desejado (integral de $f(x)$ em $[a,b])$ e retorna o $\hat{\gamma}$ que o valor estimado e uma variável booleana \verb|is_error_below_threshold| que assume o valor \verb|True| caso o erro relativo obtido é menor que o limiar e, \verb|False|, caso contrário. O erro relativo com um intervalo de 95\% de confiança é definido como:
+
+\begin{eqnarray}
+\epsilon = \frac{1.65\cdot\sqrt{\frac{Var(\hat{\gamma})}{n}}}{\hat{\gamma}}
+\end{eqnarray}
+
+\newpage
+
+%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%
+\section{Resultados} 
+%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%
+
+Para fins de referência, calculamos a integral desejada no Wolfram Alpha:
+\begin{equation}
+    \int_0^1 f(x)dx = \highlight{0.804542}
+\end{equation}
+Caso queira verificar, utilize o seguinte endereço:\\
+\url{https://www.wolframalpha.com/input/?i=integrate+exp%28-0.384850546x%29cos%280.45361387819x%29+from+0+to+1}
+\\
+
+O método que apresentou a melhor performance foi o \textbf{Contral Variate}, possivelmente porque utiliza de toda a informação da função, como também a informação obtida pela covariância entre a função original e a auxiliar.
+
+Esperávamos que o método mais lento a convergir seria o \textbf{Hit or Miss}, pois este utiliza menos informação, considerando apenas a informação binária acima ou abaixo da função, portanto seria esperado uma maior quantidade de sorteios para atintir o erro estimado. Entratanto, observamos o contrário, sua performance foi superior ao Importance Sampling.
+
+\begin{table}[h!]
+\centering
+\caption{Pseudo-random}
+\begin{tabular}{rccc}\hline\hline\\
+ Método & Aproximação & Erro & Tempo\\\\
+	\hline\hline
+	\\
+  Crude &  8.04702e-01 & 0.00273e-01 & 0:00:01.578226 \\
+  Hit-or-miss &  8.04408e-01 & 0.002988e-01 &  0:00:17.151086 \\
+  Importance S. &  8.04539e-01 & 0.00286e-01 &  0:00:53.361164 \\
+  Control Variate &  8.04635e-01 & 0.00188e-01 & 0:00:00.001425\\
+		\hline\hline
+\end{tabular}
+\label{tabpseudoresults}
+\end{table}
+
+É curioso notar que o método \textbf{Importance Sampling} foi o mais lento a convergir em ambos os geradores, possivelmente por um distanciamento significativo das caudas em relação à função original.
+
+\begin{table}[h!]
+\centering
+\caption{Quasi-random}
+\begin{tabular}{rccc}\hline\hline\\
+ Método & Aproximação & Erro & Tempo\\\\
+	\hline\hline
+	\\
+  Crude &  8.04542e-01 & 0.00273e-01 & 0:00:00.770283 \\
+  Hit-or-miss &  8.04560e-01 & 002988e-01 & 0:00:04.187210 \\
+  Importance S. &  8.04542e-01 & 0.00286e-01 &  0:00:31.834178 \\
+  Control Variate &  8.04489e-01 & 0.00213e-01 & 0:00:00.000936\\
+		\hline\hline
+\end{tabular}
+\label{tabrquasiresults}
+\end{table}
+
+
+De modo geral, observa-se que a convergência para o valor real da integral se realiza mais rapidamente com o gerador quasi-aleatório do que com o gerador pseudo-aleatório, isso se deve ao fato de que as sequências quasi-aleatórias são mais homogêneas e evitam a formação de clusters, nos apresentando informação menos redundante para a estimação, como pode ser notado pelas figuras \ref{fig:grafico-quasi} e \ref{fig:grafico-uniforme}.
+
+
+\begin{figure}[H]
+%\begin{figure}
+\includestandalone[width=\columnwidth]{quasi_plot}
+\caption{1000 números quasi-aleatórios gerados com a sequência de Halton.}
+\label{fig:grafico-quasi}
+\end{figure}
+
+
+
+Note como os pontos gerados pela distribuição Uniforme são relativamente próximos, e em alguns casos ``colidem''.
+
+\begin{figure}[H]
+%\begin{figure}
+\includestandalone[width=\columnwidth]{uniform_plot}
+\caption{1000 números pseudo-aleatórios gerados com a distribuição $Uniform(0,1)$.}
+\label{fig:grafico-uniforme}
+\end{figure}
+
+
+\end{document}
