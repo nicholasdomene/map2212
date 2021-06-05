@@ -3,16 +3,13 @@
 # Número USP 8543417
 # Felipe de Moura Ferreira
 # Número USP 9864702
-# xx de maio de 2021
+# 5 de junho de 2021
 
-import math
-import numpy as np
-from scipy.stats import beta
-import random
-import datetime
-random_seed = 1
-np.random.seed(random_seed)
+from ep4_class import EP4
+import time
 '''
+PROBLEM STATEMENT TAKEN FROM https://www.youtube.com/watch?v=ZmaYDTLR8yw
+
 - Consider the m-dimensional Multinomial statistical model,
 with observations, x, prior information, y, and parameter Theta;
 
@@ -48,3 +45,42 @@ W(v_j) - W(v_j - 1)
 - Dynamically adjust the bin's borders, v_j, to get bins of approximately
 equal weight, i.e., W(t_j) - W(t_j - 1) ~= 1/k
 '''
+
+#Insert x and y vector here
+x = [1, 1, 1]
+y = [1, 1, 1]
+
+test_cases = [0, 1, 0.9, 0.00001]
+
+ep4 = EP4(x, y)
+
+ep4.generate_theta()
+
+ep4.order_f_thetas()
+
+for test in test_cases:
+	t1 = time.time()
+	print("U(%s) = "%(test), ep4.U(test))
+	t2 = time.time()
+	print("Time taken: ", t2-t1, " seconds")
+
+# print(ep4.min_f)
+
+# t1 = time.time()
+# print(ep4.U_obsolete(0))
+# print(ep4.U_obsolete(0.00001))
+# print(ep4.U_obsolete(0.9))
+# t2 = time.time()
+# print("Time to run: ",t2 - t1, " seconds")
+# print()
+# t3 = time.time()
+# print(ep4.U(0))
+# print(ep4.U(0.00001))
+# print(ep4.U(0.9))
+# t4 = time.time()
+# print("Time to run: ",t4 - t3, " seconds")
+
+# print("Time difference: ", (t4 - t3)/(t2 - t1))
+
+# print(ep4.sup_f)
+
