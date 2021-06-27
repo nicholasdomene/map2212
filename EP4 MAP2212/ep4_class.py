@@ -24,7 +24,9 @@ class EP4:
 		# sigma^2 = 0.25 in worst case scenario where estimate is 0.5 and variance is p(1 -p) = 0.25
 		# 0.0005 is the absolute error tolerated
 		#n = z^2 * sigma^2 / 0.0005^2
-		self.n = 2722500 #defined in the report
+		# self.n = 2722500 #defined in the report
+		self.n = 10000000 
+
 		self.alpha = [x[i] + y[i] for i in range(len(x))]
 
 		#denominator_constant is the denominator of the f(Theta) function
@@ -36,7 +38,7 @@ class EP4:
 			numerator *= math.gamma(self.alpha[i])
 		B_x_y = numerator / math.gamma(sum(self.alpha))
 
-		self.denominator_constant = 1/B_x_y
+		self.denominator_constant = B_x_y
 
 	def generate_theta(self):
 		#None -> None
@@ -79,30 +81,6 @@ class EP4:
 		self.ordered_f_thetas = f_thetas
 		self.min_f = f_thetas[0] #min value of f_thetas since it is ordered
 		self.sup_f = f_thetas[-1] #max value of f_thetas since it is ordered
-
-	def U_obsolete(self, v):
-		#float -> float
-		'''
-		Output function supposed to approximate W(v) 
-		defined as: 
-		W(v) is the posterior probability mass inside T(v), that is, 
-		the probability mass where the posterior potential, f(Theta|x, y),
-		does not exceed the threshold level v
-		'''
-
-		if v > self.sup_f:
-			return 1
-		if v < self.min_f:
-			return 0
-
-		ordered = self.ordered_f_thetas
-		numerator = 0
-		i = 0 
-		while ordered[i] < v:
-			i += 1
-
-		# i + 1 because i starts at 0
-		return (i + 1)/len(ordered)
 
 	def U(self, v):
 

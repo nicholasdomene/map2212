@@ -49,10 +49,10 @@ equal weight, i.e., W(t_j) - W(t_j - 1) ~= 1/k
 #Insert x and y vector here
 print("Initiating...")
 t1 = time.time()
-x = [1, 1, 1]
-y = [1, 1, 1]
+x = [4, 6, 4]
+y = [1, 2, 3]
 
-test_cases = [0, 1, 0.9, 0.00001]
+test_cases = [0, 1, 0.5, 15, 20]
 
 ep4 = EP4(x, y)
 
@@ -66,23 +66,4 @@ for test in test_cases:
 t2 = time.time()
 print("Time taken: ", t2-t1, " seconds")
 
-# print(ep4.min_f)
-
-# t1 = time.time()
-# print(ep4.U_obsolete(0))
-# print(ep4.U_obsolete(0.00001))
-# print(ep4.U_obsolete(0.9))
-# t2 = time.time()
-# print("Time to run: ",t2 - t1, " seconds")
-# print()
-# t3 = time.time()
-# print(ep4.U(0))
-# print(ep4.U(0.00001))
-# print(ep4.U(0.9))
-# t4 = time.time()
-# print("Time to run: ",t4 - t3, " seconds")
-
-# print("Time difference: ", (t4 - t3)/(t2 - t1))
-
-# print(ep4.sup_f)
 
