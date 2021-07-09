@@ -25,7 +25,7 @@ class EP4:
 		# 0.0005 is the absolute error tolerated
 		#n = z^2 * sigma^2 / 0.0005^2
 		# self.n = 2722500 #defined in the report
-		self.n = 10000000 
+		self.n = 10000
 
 		self.alpha = [x[i] + y[i] for i in range(len(x))]
 
